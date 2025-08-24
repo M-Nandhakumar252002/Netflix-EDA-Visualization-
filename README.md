@@ -1,9 +1,9 @@
 # Netflix-EDA-Visualization-
 
-# ======================================================
-# 📊 Movie Dataset Analysis (EDA)
+
+#  Movie Dataset Analysis (EDA)
 # Author: Nandha Kumar M
-# ======================================================
+
 
 # === Importing Libraries ===
 import numpy as np
@@ -18,9 +18,9 @@ df = pd.read_csv("mymoviedb.csv", engine='python')
 print(df.head())
 print(df.info())
 
-# ======================================================
-# 🔹 Data Preprocessing
-# ======================================================
+
+#  Data Preprocessing
+
 
 # Drop rows with null values
 df.dropna(inplace=True)
@@ -45,9 +45,9 @@ df.drop(columns, axis=1, inplace=True)
 df['Release_Date'] = pd.to_datetime(df['Release_Date'])
 df['Release_Date'] = df['Release_Date'].dt.year
 
-# ======================================================
-# 🔹 Categorizing Vote_Average
-# ======================================================
+
+#  Categorizing Vote_Average
+
 
 def cat_col(df, col, labels):
     """
@@ -61,9 +61,9 @@ labels = ['worst', 'bad', 'average', 'popular']
 df = cat_col(df, 'Vote_Average', labels)
 print(df['Vote_Average'].value_counts())
 
-# ======================================================
-# 🔹 Genre Preprocessing
-# ======================================================
+
+#  Genre Preprocessing
+
 
 # Split multiple genres into rows
 df['Genre'] = df['Genre'].str.split(', ')
@@ -71,9 +71,9 @@ df = df.explode('Genre').reset_index(drop=True)
 df['Genre'] = df['Genre'].str.strip()
 df['Genre'] = df['Genre'].astype('category')
 
-# ======================================================
-# 🔹 Data Visualization
-# ======================================================
+
+#  Data Visualization
+
 
 sns.set_style('whitegrid')
 
@@ -88,11 +88,11 @@ plt.title('Vote_Average Distribution')
 plt.show()
 
 # Movie with highest popularity
-print("🎬 Movie with Highest Popularity:")
+print(" Movie with Highest Popularity:")
 print(df[df['Popularity'] == df['Popularity'].max()])
 
 # Movie with lowest popularity
-print("🎬 Movie with Lowest Popularity:")
+print("Movie with Lowest Popularity:")
 print(df[df['Popularity'] == df['Popularity'].min()])
 
 # Yearly movie distribution
