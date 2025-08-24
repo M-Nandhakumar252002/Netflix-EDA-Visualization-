@@ -1,118 +1,105 @@
 # Netflix-EDA-Visualization-
 
-## Overview
-This project explores the Netflix dataset using **Python, Pandas, and Seaborn** to find insights on content distribution, genres, and ratings.
+# ======================================================
+# 📊 Movie Dataset Analysis (EDA)
+# Author: Nandha Kumar M
+# ======================================================
 
-## Dataset
-Source: (https://github.com/TheiScale/YouTube-Video-Notes/blob/main/New%20Netflix%20Data%20Analysis%20Project%202025/mymoviedb.csv)
-
-## Objectives
-- Data cleaning (handle nulls, duplicates).
-- Exploratory analysis on:
-  - Genre distribution
-  - Release year trends
-- Visualizations with Seaborn & Matplotlib.
-
+# === Importing Libraries ===
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-df = pd.read_csv("mymoviedb.csv" ,engine= 'python')
+# === Load Dataset ===
+df = pd.read_csv("mymoviedb.csv", engine='python')
 
-df.head()
+# Preview dataset
+print(df.head())
+print(df.info())
 
-df.info()
+# ======================================================
+# 🔹 Data Preprocessing
+# ======================================================
 
-#dropping rows which has null values
-df.dropna(inplace=True) 
+# Drop rows with null values
+df.dropna(inplace=True)
+print(f"Rows after dropping nulls: {df.shape[0]}")
 
-df.shape[0]
+# Convert datatypes
+df['Vote_Count'] = df['Vote_Count'].astype(int)
+df['Vote_Average'] = df['Vote_Average'].astype(np.float64)
+print(df.info())
 
-# converting vote count and vote average to integer and float respectively
-df['Vote_Count']= df['Vote_Count'].astype(int)
-df['Vote_Average']= df['Vote_Average'].astype(np.float64)
+# Check duplicates
+print(f"Duplicate rows: {df.duplicated().sum()}")
 
+# Summary statistics
+print(df.describe())
 
-df.info()
+# Drop irrelevant columns
+columns = ['Overview', 'Original_Language', 'Poster_Url']
+df.drop(columns, axis=1, inplace=True)
 
-# checking for duplicates
-df.duplicated().sum()
+# Extract only year from release date
+df['Release_Date'] = pd.to_datetime(df['Release_Date'])
+df['Release_Date'] = df['Release_Date'].dt.year
 
-df.describe()
+# ======================================================
+# 🔹 Categorizing Vote_Average
+# ======================================================
 
-DATA PREPROCESSING
-
-# dropping the columns not required for EDA -- overview, language and poster
-columns = ['Overview','Original_Language','Poster_Url']
-df.drop(columns, axis = 1, inplace = True)
-
-df.head()
-
-# keeping only year and dropping other details in data
-df['Release_Date']= pd.to_datetime(df['Release_Date'])
-df['Release_Date']= df['Release_Date'].dt.year
-
-df.head()
-
-# creating a function for categorizing the vote_average column into 4 sections
 def cat_col(df, col, labels):
+    """
+    Function to categorize a numeric column into bins based on quantiles
+    """
     edges = list(df[col].quantile([0, 0.25, 0.5, 0.75, 1]))
-    df[col] = pd.cut(df[col], labels=labels, duplicates = 'drop', bins = edges)
+    df[col] = pd.cut(df[col], labels=labels, duplicates='drop', bins=edges)
     return df
 
-labels = ['worst','bad','average','popular']
+labels = ['worst', 'bad', 'average', 'popular']
 df = cat_col(df, 'Vote_Average', labels)
+print(df['Vote_Average'].value_counts())
 
-df.head()
+# ======================================================
+# 🔹 Genre Preprocessing
+# ======================================================
 
-df['Vote_Average'].value_counts()
-
-df.dropna(inplace=True)
-
-df.isna().sum()
-
-We split genres 
-
+# Split multiple genres into rows
 df['Genre'] = df['Genre'].str.split(', ')
-df = df.explode('Genre').reset_index(drop = True)
+df = df.explode('Genre').reset_index(drop=True)
 df['Genre'] = df['Genre'].str.strip()
+df['Genre'] = df['Genre'].astype('category')
 
-df.head()
-
-# categorising genre
-df['Genre']= df['Genre'].astype('category')
-
-Data visualization
+# ======================================================
+# 🔹 Data Visualization
+# ======================================================
 
 sns.set_style('whitegrid')
 
-# Most frequent genre of movies released in **netflix** 
-
-df['Genre'].describe()
-
-genre distribution
-
-sns.catplot(y = 'Genre', data = df, kind = 'count', order = df['Genre'].value_counts().index) 
-plt.title('Genre distribution')
+# Genre distribution
+sns.catplot(y='Genre', data=df, kind='count', order=df['Genre'].value_counts().index)
+plt.title('Genre Distribution')
 plt.show()
 
-plotting graph for finding highest voted movies
-
-sns.catplot(y = 'Vote_Average', data = df, kind = 'count', order = df['Vote_Average'].value_counts().index)
-plt.title('Highest Voted ')
+# Distribution of Vote_Average categories
+sns.catplot(y='Vote_Average', data=df, kind='count', order=df['Vote_Average'].value_counts().index)
+plt.title('Vote_Average Distribution')
 plt.show()
 
-Movie with highest Popularity
+# Movie with highest popularity
+print("🎬 Movie with Highest Popularity:")
+print(df[df['Popularity'] == df['Popularity'].max()])
 
-df[df['Popularity']== df['Popularity'].max()]
+# Movie with lowest popularity
+print("🎬 Movie with Lowest Popularity:")
+print(df[df['Popularity'] == df['Popularity'].min()])
 
-Movie with lowest Popularity
-
-df[df['Popularity']== df['Popularity'].min()]
-
-Year for which more movies released
-
+# Yearly movie distribution
 df['Release_Date'].hist()
-plt.title('Year/movie distribution')
+plt.title('Number of Movies Released per Year')
+plt.xlabel('Year')
+plt.ylabel('Count')
+plt.show()
+
 
